@@ -14,7 +14,7 @@ var mongodbmock = {
 }
 
 describe('mockgo', function() {
-    this.timeout(5000)
+    this.timeout(0)
 
     describe('dummy connection', () => {
         var connection
