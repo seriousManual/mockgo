@@ -32,9 +32,6 @@ const startServer = (callback) => {
             },
             auto_shutdown: true
         }, error => callback(error, config))
-
-        serverEmitter
-            .on('mongoStarted', (error) => console.log('mongo started', error))
     })
 }
 
