@@ -4,7 +4,7 @@
   "description": "in memory mocking engine for mongodb",
   "main": "index.js",
   "scripts": {
-    "test": "npm test"
+    "test": "mocha test.js"
   },
   "repository": {
     "type": "git",
