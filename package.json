@@ -12,11 +12,12 @@
   },
   "keywords": [
     "mongodb",
-    "mocking",
     "mongo",
+    "mock database",
+    "testing",
+    "mocking",
     "inmemory",
-    "in",
-    "memory"
+    "in memory"
   ],
   "author": "Manuel Ernst <seriousstuff@gmx.de>",
   "license": "MIT",
@@ -31,5 +32,8 @@
     "mongodb-prebuilt": "^4.6.0",
     "portfinder": "^1.0.3",
     "rimraf": "^2.5.2"
+  },
+  "engines": {
+    "node": ">=4.0"
   }
 }
