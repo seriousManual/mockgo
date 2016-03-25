@@ -47,6 +47,7 @@ describe('mockgo', () => {
         var firstResult, secondResult
 
         before(done => {
+            console.log('bef');
             mockgo.getConnection((error, connection) => {
                 var collection = connection.collection('testDataCollection')
 
@@ -56,13 +57,20 @@ describe('mockgo', () => {
                     collection.insertOne({test: 'data'}, (error, result) => {
                         collection.find({test: 'data'}).toArray((error, _result) => {
                             secondResult = _result[0]
+                            console.log('done');
                             done()
                         })
                     })
                 })
             })
         })
-        after(done => mockgo.shutDown(done))
+        after(done => {
+            console.log('after');
+            mockgo.shutDown(() => {
+                console.log('after done');
+                done()
+            })
+        })
 
         it('should not load anything', () => expect(firstResult).to.be.deep.equal([]))
         it('should not load anything', () => expect(secondResult.test).to.be.deep.equal('data'))
@@ -72,18 +80,26 @@ describe('mockgo', () => {
         var connection, prevMongodb
 
         before(done => {
+            console.log('bef2');
+
             prevMongodb = mockgo.mongodb
             mockgo.mongodb = mongodbmock
 
             mockgo.getConnection('myLovelyNamedConnection', (error, _connection) => {
+                console.log('done2');
+
                 expect(error).to.be.null
                 connection = _connection
                 done()
             })
         })
         after(done => {
-            mockgo.shutDown(done)
+            console.log('after2');
             mockgo.mongodb = prevMongodb
+            mockgo.shutDown(() => {
+                console.log('after done2');
+                done()
+            })
         })
 
         it('should have used the mock', () => expect(connection._uri).to.match(/mongodb:\/\/127.0.0.1:\d+\/myLovelyNamedConnection/))
