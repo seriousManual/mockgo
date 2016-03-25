@@ -1,13 +1,13 @@
 # MOCKGO
 
-Mockgo is a in memory mocking engine for mongodb.
+Mockgo is a in-memory mocking engine for mongodb.
 In [contrast](https://www.npmjs.com/package/mongo-mock-server) [to](https://www.npmjs.com/package/mock-mongo-db) [existing](https://www.npmjs.com/package/mongo-mock) [solutions](https://www.npmjs.com/package/mongodb-mock) mockgo does not try to imitate the mongodb interface by implementing its methods.
 Instead it uses the same approach [Mockgoose](https://www.npmjs.com/package/mockgoose) uses and spins up a actual mongodb instance which holds the data in memory.
 That way the full feature set of mongodb can be used.
 
-Works on all platforms which is due to the awesome [mongodb-prebuilt package](https://www.npmjs.com/package/mongodb-prebuilt)
+Works on all platforms which is due to the awesome [mongodb-prebuilt](https://www.npmjs.com/package/mongodb-prebuilt) package.
 
-After spinning ab the mongodb instance a connection to that instance is automatically created and returned.
+After spinning up the mongodb instance a connection to that instance is automatically created and returned.
 
 ## Installation
 ````
@@ -15,7 +15,7 @@ npm install mockgo
 ````
 
 ## Usage
-Require mockgo, than retrieve a connection to the inmemory instance on mongodb by calling `getConnection``.
+Require mockgo, then retrieve a connection to the in-memory instance of mongodb by calling `getConnection`.
 An optional database name can be specified.
 
 ````javascript
@@ -27,7 +27,7 @@ mockgo.getConnection((error, connection) => {
 ````
 
 You can retrieve connections to as many databases as you wish.
-They are internally cached
+They are internally cached.
 
 ## Example
 ````javascript
@@ -53,13 +53,13 @@ mockgo.getConnection('testDatabase', (error, connection) => {
 ## Methods and Properties
 
 ### mockgo.getConnection([databaseName], callback)
-Returns a connection to a in memory instance on mongodb.
-If no databaseName is specified a dummy name will be used.
+Returns a connection to a in-memory instance on mongodb.
+If no `databaseName` is specified a dummy name will be used.
 If a connection to the same database is requested multiple times a cached version of the same connection instance is returned.
 
 The connection instance is a instance from the official native [mongodb](https://www.npmjs.com/package/mongodb) driver.
 
-If you wish to use another version of the mongodb package you can easily override it easily by setting the `mongodb` property *before* requiring a connection:
+If you wish to use another version of the mongodb package you can easily override it by setting the `mongodb` property *before* requiring a connection:
 
 ````javascript
 var mockgo = require('mockgo')
@@ -87,10 +87,10 @@ var mockgo = require('mockgo')
 var Loader = require('../lib/Loader')
 
 describe('loaderTest', () => {
-    var connection, loader, result, error
+    var result, error
 
     before(done => {
-        mockgo.getConnection((error, _connection) => {
+        mockgo.getConnection((error, connection) => {
             expect(error).to.be.null
             loader = new Loader(connection)
 
@@ -103,7 +103,7 @@ describe('loaderTest', () => {
     })
     after(done => mockgo.shutdown(done))
 
-    it('should not return a error', () => expect(error).to.be.nul)
+    it('should not return a error', () => expect(error).to.be.null)
     it('should load something', () => expect(result).to.deep.equal({awesome: 'data'})
 })
 
@@ -113,7 +113,7 @@ describe('loaderTest', () => {
 # License
 The MIT License (MIT)
 
-Copyright (c) 2015 Manuel Ernst
+Copyright (c) 2016 Manuel Ernst
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
