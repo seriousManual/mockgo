@@ -1,3 +1,4 @@
+var async = require('async')
 var expect = require('chai').expect
 
 var mockgo = require('./')
@@ -68,6 +69,60 @@ describe('mockgo', function() {
 
         it('should not load anything', () => expect(firstResult).to.be.deep.equal([]))
         it('should not load anything', () => expect(secondResult.test).to.be.deep.equal('data'))
+    })
+
+    describe('seperate databases', () => {
+        after(done => mockgo.shutDown(done))
+
+        it('should write into seperate databases', done => {
+            async.series([
+                cb => mockgo.getConnection('db1', cb),
+                cb => mockgo.getConnection('db2', cb)
+            ], (error, connections) => {
+                expect(error).to.be.null
+                var c0 = connections[0].collection('c')
+                var c1 = connections[1].collection('c')
+
+                async.series([
+                    cb => c0.insertOne({test: 'data'}, cb),
+                    cb => c0.find({}).toArray(cb),
+                    cb => c1.find({}).toArray(cb)
+                ], (error, results) => {
+                    expect(error).to.be.null
+
+                    expect(results[1][0].test).to.equal('data')
+                    expect(results[2]).to.deep.equal([])
+                    done()
+                })
+            })
+        })
+    })
+
+    describe('combined databases', () => {
+        after(done => mockgo.shutDown(done))
+
+        it('should write into the same database databases', done => {
+            async.series([
+                    cb => mockgo.getConnection('db1', cb),
+                    cb => mockgo.getConnection('db2', cb)
+            ], (error, connections) => {
+                expect(error).to.be.null
+                var c0 = connections[0].collection('c')
+                var c1 = connections[1].collection('c')
+
+                async.series([
+                        cb => c0.insertOne({test: 'data'}, cb),
+                        cb => c0.find({}).toArray(cb),
+                        cb => c1.find({}).toArray(cb)
+                ], (error, results) => {
+                    expect(error).to.be.null
+
+                    expect(results[1][0].test).to.equal('data')
+                    expect(results[1][0].test).to.equal('data')
+                    done()
+                })
+            })
+        })
     })
 
     describe('overwriting mongodb', () => {
