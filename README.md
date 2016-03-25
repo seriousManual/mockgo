@@ -1,4 +1,4 @@
-# MOCKGO
+# MOCKGO [![Build Status](https://travis-ci.org/seriousManual/mockgo.png)](https://travis-ci.org/seriousManual/mockgo)
 
 Mockgo is a in-memory mocking engine for mongodb.
 In [contrast](https://www.npmjs.com/package/mongo-mock-server) [to](https://www.npmjs.com/package/mock-mongo-db) [existing](https://www.npmjs.com/package/mongo-mock) [solutions](https://www.npmjs.com/package/mongodb-mock) mockgo does not try to imitate the mongodb interface by implementing its methods.
