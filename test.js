@@ -12,7 +12,9 @@ var mongodbmock = {
     }
 }
 
-describe('mockgo', () => {
+describe('mockgo', function() {
+    this.timeout(5000)
+
     describe('dummy connection', () => {
         var connection
 
