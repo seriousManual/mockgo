@@ -1,0 +1,5 @@
+.idea
+node_modules
+.data/diagnostic.data
+mongod.lock
+storage.bson

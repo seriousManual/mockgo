@@ -1,0 +1,35 @@
+{
+  "name": "mockgo",
+  "version": "1.0.0",
+  "description": "in memory mocking engine for mongodb",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/seriousManual/mockgo.git"
+  },
+  "keywords": [
+    "mongodb",
+    "mocking",
+    "mongo",
+    "inmemory",
+    "in",
+    "memory"
+  ],
+  "author": "Manuel Ernst <seriousstuff@gmx.de>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/seriousManual/mockgo/issues"
+  },
+  "homepage": "https://github.com/seriousManual/mockgo#readme",
+  "dependencies": {
+    "async": "^1.5.2",
+    "debug": "^2.2.0",
+    "mongodb": "^2.1.11",
+    "mongodb-prebuilt": "^4.6.0",
+    "portfinder": "^1.0.3",
+    "rimraf": "^2.5.2"
+  }
+}
