@@ -2,6 +2,16 @@ var expect = require('chai').expect
 
 var mockgo = require('./')
 
+var mongodbmock = {
+    _uri: '',
+    connect: (uri, callback) => {
+        callback(null, {
+            _uri: uri,
+            close: callback => process.nextTick(callback)
+        })
+    }
+}
+
 describe('mockgo', () => {
     describe('dummy connection', () => {
         var connection
@@ -17,7 +27,6 @@ describe('mockgo', () => {
 
         it('should open a connection with a dummy database name', () => expect(connection.s.databaseName).to.equal('testDatabase'))
     })
-
 
     describe('named connection', () => {
         var connection
@@ -57,5 +66,26 @@ describe('mockgo', () => {
 
         it('should not load anything', () => expect(firstResult).to.be.deep.equal([]))
         it('should not load anything', () => expect(secondResult.test).to.be.deep.equal('data'))
+    })
+
+    describe('overwriting mongodb', () => {
+        var connection, prevMongodb
+
+        before(done => {
+            prevMongodb = mockgo.mongodb
+            mockgo.mongodb = mongodbmock
+
+            mockgo.getConnection('myLovelyNamedConnection', (error, _connection) => {
+                expect(error).to.be.null
+                connection = _connection
+                done()
+            })
+        })
+        after(done => {
+            mockgo.shutDown(done)
+            mockgo.mongodb = prevMongodb
+        })
+
+        it('should have used the mock', () => expect(connection._uri).to.match(/mongodb:\/\/127.0.0.1:\d+\/myLovelyNamedConnection/))
     })
 })
