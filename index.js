@@ -97,7 +97,7 @@ const shutDown = callback => {
     var cons = Object.keys(connectionCache).map(key => connectionCache[key])
 
     if (cons.length > 0) {
-        debug('shut down mongo connections')
+        debug('closing %d mongo connections', cons.length)
         async.each(cons, (con, cb) => con.close(cb), callback)
     } else {
         process.nextTick(() => callback(null))
