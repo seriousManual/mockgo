@@ -103,22 +103,22 @@ describe('mockgo', function() {
 
         it('should write into the same database databases', done => {
             async.series([
-                    cb => mockgo.getConnection('db1', cb),
-                    cb => mockgo.getConnection('db2', cb)
+                cb => mockgo.getConnection('db', cb),
+                cb => mockgo.getConnection('db', cb)
             ], (error, connections) => {
                 expect(error).to.be.null
                 var c0 = connections[0].collection('c')
                 var c1 = connections[1].collection('c')
 
                 async.series([
-                        cb => c0.insertOne({test: 'data'}, cb),
-                        cb => c0.find({}).toArray(cb),
-                        cb => c1.find({}).toArray(cb)
+                    cb => c0.insertOne({test: 'data'}, cb),
+                    cb => c0.find({}).toArray(cb),
+                    cb => c1.find({}).toArray(cb)
                 ], (error, results) => {
                     expect(error).to.be.null
 
                     expect(results[1][0].test).to.equal('data')
-                    expect(results[1][0].test).to.equal('data')
+                    expect(results[2][0].test).to.equal('data')
                     done()
                 })
             })
