@@ -22,6 +22,7 @@ const startServer = (callback) => {
             port: port
         }
 
+        debug('startServer on port %d', port)
         serverEmitter = mongodb_prebuilt.start_server({
             args: {
                 storageEngine: 'ephemeralForTest',
@@ -78,7 +79,6 @@ const getConnection = (dbName, callback) => {
         return createServerSpecificConfiguration(serverConfig, dbName, callback)
     }
 
-    debug('startServer')
     startServer((error, resultConfiguration) => {
         if (error) return callback(error)
 
@@ -93,6 +93,10 @@ const shutDown = callback => {
         serverEmitter.emit('mongoShutdown')
     }
 
+    serverEmitter = null
+    serverConfig = null
+    connectionCache = {}
+
     var cons = Object.keys(connectionCache).map(key => connectionCache[key])
 
     if (cons.length > 0) {
@@ -101,7 +105,6 @@ const shutDown = callback => {
     } else {
         process.nextTick(() => callback(null))
     }
-
 }
 
 module.exports = {
