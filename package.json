@@ -1,6 +1,6 @@
 {
   "name": "mockgo",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "in memory mocking engine for mongodb",
   "main": "index.js",
   "scripts": {
