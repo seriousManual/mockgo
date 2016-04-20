@@ -8,10 +8,13 @@ var mongodb = require('mongodb')
 var debug = require('debug')('mockgo')
 
 var connectionCache = {}
+var maxRetries = 5
 var serverConfig = null
 var serverEmitter = null
 
 const startServer = (callback) => {
+    var retries = 0
+
     portfinder.getPort((error, port) => {
         if (error) {
             return callback(error)
@@ -31,7 +34,13 @@ const startServer = (callback) => {
                 dbpath: path.join(__dirname, './.data')
             },
             auto_shutdown: true
-        }, error => callback(error, config))
+        }, error => {
+            if (error === 'EADDRINUSE' && retries++ < maxRetries) {
+                return setTimeout(() => startServer(callback), 200)
+            }
+
+            callback(error, config)
+        })
     })
 }
 
