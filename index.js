@@ -16,9 +16,7 @@ const startServer = (callback) => {
     var retries = 0
 
     portfinder.getPort((error, port) => {
-        if (error) {
-            return callback(error)
-        }
+        if (error) return callback(error)
 
         var config = {
             host: '127.0.0.1',
