@@ -3,7 +3,7 @@ var path = require('path')
 
 var async = require('async')
 var portfinder = require('portfinder')
-var mongodb_prebuilt = require('mongodb-prebuilt');
+var mongodbPrebuilt = require('mongodb-prebuilt');
 var mongodb = require('mongodb')
 var debug = require('debug')('mockgo')
 
@@ -12,8 +12,8 @@ var maxRetries = 5
 var serverConfig = null
 var serverEmitter = null
 
-const startServer = (callback) => {
-    var retries = 0
+const startServer = (callback, retries) => {
+    retries = retries || 0
 
     portfinder.getPort((error, port) => {
         if (error) return callback(error)
@@ -24,7 +24,7 @@ const startServer = (callback) => {
         }
 
         debug('startServer on port %d', port)
-        serverEmitter = mongodb_prebuilt.start_server({
+        serverEmitter = mongodbPrebuilt.start_server({
             args: {
                 storageEngine: 'ephemeralForTest',
                 bind_ip: config.host,
@@ -33,8 +33,8 @@ const startServer = (callback) => {
             },
             auto_shutdown: true
         }, error => {
-            if (error === 'EADDRINUSE' && retries++ < maxRetries) {
-                return setTimeout(() => startServer(callback), 200)
+            if (error === 'EADDRINUSE' && retries < maxRetries) {
+                return setTimeout(() => startServer(callback, retries++), 200)
             }
 
             callback(error, config)
