@@ -99,13 +99,14 @@ const shutDown = callback => {
 
     serverEmitter = null
     serverConfig = null
-    connectionCache = {}
 
-    var cons = Object.keys(connectionCache).map(key => connectionCache[key])
-
-    if (cons.length > 0) {
-        debug('closing %d mongo connections', cons.length)
-        async.each(cons, (con, cb) => con.close(cb), callback)
+    var connections = Object.keys(connectionCache).map(key => connectionCache[key])
+    if (connections.length > 0) {
+        debug('closing %d mongo connections', connections.length)
+        async.each(connections, (con, cb) => con.close(cb), error => {
+            connectionCache = {}
+            callback(error)
+        })
     } else {
         process.nextTick(() => callback(null))
     }
