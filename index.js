@@ -92,6 +92,10 @@ const getConnection = (dbName, callback) => {
 }
 
 const shutDown = callback => {
+    if (typeof callback !== 'function') {
+        callback = () => {}
+    }
+
     if (serverEmitter) {
         debug('emit shutdown event')
         serverEmitter.emit('mongoShutdown')
