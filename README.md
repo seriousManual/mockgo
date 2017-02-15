@@ -2,7 +2,7 @@
 
 Mockgo is a in-memory mocking engine for mongodb.
 In [contrast](https://www.npmjs.com/package/mongo-mock-server) [to](https://www.npmjs.com/package/mock-mongo-db) [existing](https://www.npmjs.com/package/mongo-mock) [solutions](https://www.npmjs.com/package/mongodb-mock) mockgo does not try to imitate the mongodb interface by implementing its methods.
-Instead it uses the same approach [Mockgoose](https://www.npmjs.com/package/mockgoose) uses and spins up a actual mongodb instance which holds the data in memory.
+Instead it uses the same approach [Mockgoose](https://www.npmjs.com/package/mockgoose) uses and spins up an actual mongodb instance which holds the data in memory.
 That way the full feature set of mongodb can be used.
 
 Works on all platforms which is due to the awesome [mongodb-prebuilt](https://www.npmjs.com/package/mongodb-prebuilt) package.
