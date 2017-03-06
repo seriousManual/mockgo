@@ -54,6 +54,28 @@ mockgo.getConnection('testDatabase', (error, connection) => {
 })
 ````
 
+If you are using version of the mongodb driver that supports promises you can use them aswell:
+
+```javascript
+const mockgo = require('mockgo');
+
+mockgo.getConnection((error, connection) => {
+    const collection = connection.collection('testDataCollection');
+
+    collection
+        .find({})
+        .toArray()
+        .then((result) => {
+            console.log(result); //result: []
+            return collection.insertOne({ test: 'data' });
+        })
+        .then((result) => collection.find({ test: 'data' }).toArray())
+        .then((result) => {
+            console.log(result); //result: [ { _id: 56f52afef6d8838417df1688, test: 'data' } ]
+            mockgo.shutDown(() => console.log('shutdown complete'));
+        });
+});
+```
 ## Methods and Properties
 
 ### mockgo.getConnection([databaseName], callback)
