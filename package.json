@@ -27,7 +27,7 @@
   "homepage": "https://github.com/seriousManual/mockgo#readme",
   "dependencies": {
     "async": "^2.0.1",
-    "debug": "^2.2.0",
+    "debug": "^2.4.0",
     "mongodb": "^2.1.11",
     "mongodb-prebuilt": "^4.6.0",
     "portfinder": "^1.0.3"
