@@ -60,7 +60,9 @@ const createServerSpecificConfiguration = (serverConfig, dbName, callback) => {
     var configCopy = Object.assign({}, serverConfig)
     configCopy.database = dbName
     createConnection(configCopy, (error, connection) => {
-        if (error) callback(error)
+        if (error) {
+            return callback(error)
+        }
 
         connectionCache[dbName] = connection
         callback(null, connection)
@@ -84,7 +86,9 @@ const getConnection = (dbName, callback) => {
     }
 
     startServer((error, resultConfiguration) => {
-        if (error) return callback(error)
+        if (error) {
+            return callback(error)
+        }
 
         serverConfig = resultConfiguration
         createServerSpecificConfiguration(serverConfig, dbName, callback)
