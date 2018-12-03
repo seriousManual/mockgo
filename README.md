@@ -25,6 +25,12 @@ An optional database name can be specified.
 ````javascript
 var mockgo = require('mockgo')
 
+// Using promises
+mockgo.getConnection().then(connection => {
+  //`connection` is the connection to the mongodb instance
+})
+
+// Using callbacks
 mockgo.getConnection((error, connection) => {
   //`connection` is the connection to the mongodb instance
 })
@@ -37,6 +43,19 @@ They are internally cached.
 ````javascript
 var mockgo = require('mockgo')
 
+// Using promises
+return mockgo.getConnection().then(connection => {
+  var collection = connection.collection('testDataCollection')
+  return collection.find({}).toArray()
+    .then(result => console.log(result)) //result: []
+    .then(() => collection.insertOne({test: 'data'}))
+    .then(() => collection.find({test: 'data'}).toArray())
+    .then(result => console.log(result)) //result: [ { _id: 56f52afef6d8838417df1688, test: 'data' } ]
+})
+.then(() => mockgo.shutDown())
+.then(() => console.log('shutdown complete'))
+
+// Using callbacks
 mockgo.getConnection('testDatabase', (error, connection) => {
     var collection = connection.collection('testDataCollection')
 
@@ -56,8 +75,8 @@ mockgo.getConnection('testDatabase', (error, connection) => {
 
 ## Methods and Properties
 
-### mockgo.getConnection([databaseName], callback)
-Returns a connection to a in-memory instance on mongodb.
+### mockgo.getConnection([databaseName])
+Returns a promise resolved with a connection to a in-memory instance on mongodb.
 If no `databaseName` is specified a dummy name will be used.
 If a connection to the same database is requested multiple times a cached version of the same connection instance is returned.
 
@@ -69,13 +88,31 @@ If you wish to use another version of the mongodb package you can easily overrid
 var mockgo = require('mockgo')
 var mockgo.mongodb = require('mongodb') //version xyz
 
-mockgo.getConnection((error, result) => {
-    // ...
+mockgo.getConnection().then(connection => {
+  //`connection` is the connection to the mongodb instance
 })
 ````
 
-### mockgo.shutDown(callback)
+### mockgo.getConnection([databaseName], callback)
+Same as the promise-based method.
+Invokes the callback with the connection to the database.
+
+````javascript
+var mockgo = require('mockgo')
+var mockgo.mongodb = require('mongodb') //version xyz
+
+mockgo.getConnection((error, connection) => {
+    //`connection` is the connection to the mongodb instance
+})
+````
+
+### mockgo.shutDown()
 Closes all existing mongodb connections and shuts down the mongodb instance.
+Returns a promise resolved once the cleanup has finished.
+
+### mockgo.shutDown(callback)
+Same as the promise-based method.
+Invokes the callback once the cleanup has finished
 
 ### mockgo.mongodb
 Exposes the version of the official native mongodb driver, gives the possibility to override it.

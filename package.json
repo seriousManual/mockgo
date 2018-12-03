@@ -1,10 +1,11 @@
 {
   "name": "mockgo",
-  "version": "1.1.7",
+  "version": "1.2.1",
   "description": "in memory mocking engine for mongodb",
   "main": "index.js",
   "scripts": {
-    "test": "mocha test.js"
+    "test": "mocha test.js",
+    "postinstall": "node postinstall.js"
   },
   "repository": {
     "type": "git",
@@ -27,16 +28,16 @@
   "homepage": "https://github.com/seriousManual/mockgo#readme",
   "dependencies": {
     "async": "^2.0.1",
-    "debug": "^2.2.0",
-    "mongodb": "^2.1.11",
-    "mongodb-prebuilt": "^4.6.0",
-    "portfinder": "^1.0.3"
+    "debug": "^4.1.0",
+    "mongodb": "^3.1.10",
+    "mongodb-prebuilt": "^6.4.0",
+    "portfinder": "^1.0.20"
   },
   "engines": {
     "node": ">=4.0"
   },
   "devDependencies": {
-    "chai": "^3.5.0",
-    "mocha": "^3.0.0"
+    "chai": "^4.2.0",
+    "mocha": "^5.2.0"
   }
 }
