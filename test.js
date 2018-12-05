@@ -1,14 +1,14 @@
-var async = require('async')
-var expect = require('chai').expect
+const async = require('async')
+const expect = require('chai').expect
 
-var mockgo = require('./')
+const mockgo = require('./')
 
-var mongodbmock = {
+const mongodbmock = {
     _uri: '',
-    connect: (uri, callback) => {
-        callback(null, {
-            _uri: uri,
-            close: callback => process.nextTick(callback)
+    connect: uri => {
+        return Promise.resolve({
+            db: dbName => ({ a: 'mockConnection', uri: uri + '/' + dbName }),
+            close: () => Promise.resolve()
         })
     }
 }
@@ -16,133 +16,254 @@ var mongodbmock = {
 describe('mockgo', function() {
     this.timeout(0)
 
-    describe('dummy connection', () => {
-        var connection
+    describe('promise-based interface', () => {
 
-        before(done => {
-            mockgo.getConnection((error, _connection) => {
-                expect(error).to.be.null
+        describe('default dbName connection', () => {
+            let connection
+
+            before(() => mockgo.getConnection().then(_connection => {
                 connection = _connection
-                done()
+            }))
+            after(() => mockgo.shutDown())
+
+            it('should open a connection with the default database name', () => expect(connection.databaseName).to.equal('testDatabase'))
+        })
+
+        describe('named connection', () => {
+            let connection
+
+            before(() => mockgo.getConnection('namedConnection').then(_connection => {
+                connection = _connection
+            }))
+            after(() => mockgo.shutDown())
+
+            it('should open a connection with a given name', () => expect(connection.databaseName).to.equal('namedConnection'))
+        })
+
+        describe('exposed connection', () => {
+            let firstResult, secondResult
+
+            before(() => mockgo.getConnection().then(connection => {
+                let collection = connection.collection('testDataCollection')
+                return collection.find({}).toArray()
+                    .then(result => { firstResult = result })
+                    .then(() => collection.insertOne({test: 'data'}))
+                    .then(() => collection.find({test: 'data'}).toArray())
+                    .then(result => { secondResult = result[0] })
+            }))
+            after(() => mockgo.shutDown())
+
+            it('should not find anything when its empty', () => expect(firstResult).to.be.deep.equal([]))
+            it('should find inserted data', () => expect(secondResult.test).to.be.deep.equal('data'))
+        })
+
+        describe('seperate databases', () => {
+            after(() => mockgo.shutDown())
+
+            it('should write into seperate databases', () => {
+                let collection1, collection2
+
+                return Promise.all([
+                    mockgo.getConnection('db1'),
+                    mockgo.getConnection('db2')
+                ]).then(connections => {
+                    collection1 = connections[0].collection('c')
+                    collection2 = connections[1].collection('c')
+                    return collection1.insertOne({test: 'data'})
+                }).then(() => Promise.all([
+                    collection1.find({}).toArray(),
+                    collection2.find({}).toArray()
+                ])).then(results => {
+                    expect(results[0][0].test).to.equal('data')
+                    expect(results[1]).to.deep.equal([])
+                })
             })
         })
-        after(done => mockgo.shutDown(done))
 
-        it('should open a connection with a dummy database name', () => expect(connection.s.databaseName).to.equal('testDatabase'))
-    })
+        describe('combined databases', () => {
+            after(() => mockgo.shutDown())
 
-    describe('named connection', () => {
-        var connection
+            it('should write into the same database databases', () => {
+                let collection1, collection2
 
-        before(done => {
-            mockgo.getConnection('namedConnection', (error, _connection) => {
-                expect(error).to.be.null
-                connection = _connection
-                done()
+                return Promise.all([
+                    mockgo.getConnection('db'),
+                    mockgo.getConnection('db')
+                ]).then(connections => {
+                    collection1 = connections[0].collection('c')
+                    collection2 = connections[1].collection('c')
+                    return collection1.insertOne({test: 'data'})
+                }).then(() => Promise.all([
+                    collection1.find({}).toArray(),
+                    collection2.find({}).toArray()
+                ])).then(results => {
+                    expect(results[0][0].test).to.equal('data')
+                    expect(results[1][0].test).to.equal('data')
+                })
             })
         })
-        after(done => mockgo.shutDown(done))
 
-        it('should open a connection with a given name', () => expect(connection.s.databaseName).to.equal('namedConnection'))
+        describe('overwriting mongodb', () => {
+            let connection, prevMongodb
+
+            before(() => {
+                prevMongodb = mockgo.mongodb
+                mockgo.mongodb = mongodbmock
+
+                return mockgo.getConnection('myLovelyNamedConnection').then(_connection => {
+                  connection = _connection
+                })
+            })
+            after(() => {
+                mockgo.mongodb = prevMongodb
+                return mockgo.shutDown()
+            })
+
+            it('should have used the mock', () => expect(connection.uri).to.match(/mongodb:\/\/127.0.0.1:\d+\/myLovelyNamedConnection/))
+        })
+
     })
 
-    describe('exposed connection', () => {
-        var firstResult, secondResult
+    describe('callback-based interface', () => {
 
-        before(done => {
-            mockgo.getConnection((error, connection) => {
-                var collection = connection.collection('testDataCollection')
+        describe('default dbName connection', () => {
+            let connection
 
-                collection.find({}).toArray((error, _result) => {
-                    firstResult = _result
+            before(done => {
+                mockgo.getConnection((error, _connection) => {
+                    expect(error).to.be.null
+                    connection = _connection
+                    done()
+                })
+            })
+            after(done => {
+                mockgo.shutDown(done)
+            })
 
-                    collection.insertOne({test: 'data'}, (error, result) => {
-                        collection.find({test: 'data'}).toArray((error, _result) => {
-                            secondResult = _result[0]
-                            done()
+            it('should open a connection with the default database name', () => expect(connection.databaseName).to.equal('testDatabase'))
+        })
+
+        describe('named connection', () => {
+            let connection
+
+            before(done => {
+                mockgo.getConnection('namedConnection', (error, _connection) => {
+                    expect(error).to.be.null
+                    connection = _connection
+                    done()
+                })
+            })
+            after(done => {
+                mockgo.shutDown(done)
+            })
+
+            it('should open a connection with a given name', () => expect(connection.databaseName).to.equal('namedConnection'))
+        })
+
+        describe('exposed connection', () => {
+            let firstResult, secondResult
+
+            before(done => {
+                mockgo.getConnection((error, connection) => {
+                    let collection = connection.collection('testDataCollection')
+
+                    collection.find({}).toArray((error, _result) => {
+                        firstResult = _result
+
+                        collection.insertOne({test: 'data'}, (error, result) => {
+                            collection.find({test: 'data'}).toArray((error, _result) => {
+                                secondResult = _result[0]
+                                done()
+                            })
                         })
                     })
                 })
             })
+            after(done => {
+                mockgo.shutDown(done)
+            })
+
+            it('should not find anything when its empty', () => expect(firstResult).to.be.deep.equal([]))
+            it('should find inserted data', () => expect(secondResult.test).to.be.deep.equal('data'))
         })
-        after(done => mockgo.shutDown(done))
 
-        it('should not load anything', () => expect(firstResult).to.be.deep.equal([]))
-        it('should not load anything', () => expect(secondResult.test).to.be.deep.equal('data'))
-    })
+        describe('seperate databases', () => {
+            after(done => {
+                mockgo.shutDown(done)
+            })
 
-    describe('seperate databases', () => {
-        after(done => mockgo.shutDown(done))
-
-        it('should write into seperate databases', done => {
-            async.series([
-                cb => mockgo.getConnection('db1', cb),
-                cb => mockgo.getConnection('db2', cb)
-            ], (error, connections) => {
-                expect(error).to.be.null
-                var c0 = connections[0].collection('c')
-                var c1 = connections[1].collection('c')
-
+            it('should write into seperate databases', done => {
                 async.series([
-                    cb => c0.insertOne({test: 'data'}, cb),
-                    cb => c0.find({}).toArray(cb),
-                    cb => c1.find({}).toArray(cb)
-                ], (error, results) => {
+                    cb => mockgo.getConnection('db1', cb),
+                    cb => mockgo.getConnection('db2', cb)
+                ], (error, connections) => {
                     expect(error).to.be.null
+                    let c0 = connections[0].collection('c')
+                    let c1 = connections[1].collection('c')
 
-                    expect(results[1][0].test).to.equal('data')
-                    expect(results[2]).to.deep.equal([])
-                    done()
+                    async.series([
+                        cb => c0.insertOne({test: 'data'}, cb),
+                        cb => c0.find({}).toArray(cb),
+                        cb => c1.find({}).toArray(cb)
+                    ], (error, results) => {
+                        expect(error).to.be.null
+
+                        expect(results[1][0].test).to.equal('data')
+                        expect(results[2]).to.deep.equal([])
+                        done()
+                    })
                 })
             })
         })
-    })
 
-    describe('combined databases', () => {
-        after(done => mockgo.shutDown(done))
+        describe('combined databases', () => {
+            after(done => {
+                mockgo.shutDown(done)
+            })
 
-        it('should write into the same database databases', done => {
-            async.series([
-                cb => mockgo.getConnection('db', cb),
-                cb => mockgo.getConnection('db', cb)
-            ], (error, connections) => {
-                expect(error).to.be.null
-                var c0 = connections[0].collection('c')
-                var c1 = connections[1].collection('c')
-
+            it('should write into the same database databases', done => {
                 async.series([
-                    cb => c0.insertOne({test: 'data'}, cb),
-                    cb => c0.find({}).toArray(cb),
-                    cb => c1.find({}).toArray(cb)
-                ], (error, results) => {
+                    cb => mockgo.getConnection('db', cb),
+                    cb => mockgo.getConnection('db', cb)
+                ], (error, connections) => {
                     expect(error).to.be.null
+                    let c0 = connections[0].collection('c')
+                    let c1 = connections[1].collection('c')
 
-                    expect(results[1][0].test).to.equal('data')
-                    expect(results[2][0].test).to.equal('data')
-                    done()
+                    async.series([
+                        cb => c0.insertOne({test: 'data'}, cb),
+                        cb => c0.find({}).toArray(cb),
+                        cb => c1.find({}).toArray(cb)
+                    ], (error, results) => {
+                        expect(error).to.be.null
+
+                        expect(results[1][0].test).to.equal('data')
+                        expect(results[2][0].test).to.equal('data')
+                        done()
+                    })
                 })
             })
         })
-    })
 
-    describe('overwriting mongodb', () => {
-        var connection, prevMongodb
+        describe('overwriting mongodb', () => {
+            let connection, prevMongodb
 
-        before(done => {
-            prevMongodb = mockgo.mongodb
-            mockgo.mongodb = mongodbmock
+            before(done => {
+                prevMongodb = mockgo.mongodb
+                mockgo.mongodb = mongodbmock
 
-            mockgo.getConnection('myLovelyNamedConnection', (error, _connection) => {
-                expect(error).to.be.null
-                connection = _connection
-                done()
+                mockgo.getConnection('myLovelyNamedConnection', (error, _connection) => {
+                    expect(error).to.be.null
+                    connection = _connection
+                    done()
+                })
             })
-        })
-        after(done => {
-            mockgo.mongodb = prevMongodb
-            mockgo.shutDown(done)
-        })
+            after(done => {
+                mockgo.mongodb = prevMongodb
+                mockgo.shutDown(done)
+            })
 
-        it('should have used the mock', () => expect(connection._uri).to.match(/mongodb:\/\/127.0.0.1:\d+\/myLovelyNamedConnection/))
+            it('should have used the mock', () => expect(connection.uri).to.match(/mongodb:\/\/127.0.0.1:\d+\/myLovelyNamedConnection/))
+        })
     })
 })
