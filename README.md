@@ -116,15 +116,16 @@ Exposes the version of the official native mongodb driver, gives the possibility
 ## Testing with Mocha
 
 This is an example for a simple test with `mockgo` in mocha.
+This of course works similar or equally in other test runners, the `setup` and `tearDown` semantics may vary.
 
 ````javascript
-var expect = require('chai').expect
-var mockgo = require('mockgo')
+let expect = require('chai').expect
+let mockgo = require('mockgo')
 
-var Loader = require('../lib/Loader')
+let Loader = require('../lib/Loader')
 
 describe('loaderTest', () => {
-    var result, error
+    let result, error
 
     before(done => {
         mockgo.getConnection((error, connection) => {
