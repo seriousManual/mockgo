@@ -2,8 +2,6 @@
 
 [![NPM](https://nodei.co/npm/mockgo.png)](https://nodei.co/npm/mockgo/)
 
-[![NPM](https://nodei.co/npm-dl/mockgo.png?months=12)](https://nodei.co/npm/mockgo/)
-
 Mockgo is a in-memory mocking engine for mongodb.
 In [contrast](https://www.npmjs.com/package/mongo-mock-server) [to](https://www.npmjs.com/package/mock-mongo-db) [existing](https://www.npmjs.com/package/mongo-mock) [solutions](https://www.npmjs.com/package/mongodb-mock) mockgo does not try to imitate the mongodb interface by implementing its methods.
 Instead it uses the same approach [Mockgoose](https://www.npmjs.com/package/mockgoose) uses and spins up an actual mongodb instance which holds the data in memory.
