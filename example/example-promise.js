@@ -1,7 +1,7 @@
-var mockgo = require('../index')
+const mockgo = require('../index')
 
 return mockgo.getConnection().then(connection => {
-  var collection = connection.collection('testDataCollection')
+  const collection = connection.collection('testDataCollection')
   return collection.find({}).toArray()
     .then(result => console.log(result)) //result: []
     .then(() => collection.insertOne({test: 'data'}))
