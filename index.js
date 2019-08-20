@@ -53,7 +53,7 @@ const createMongoClient = config => {
 
     //we add the possibilty to override the version of the mongodb driver
     //by exposing it via module.exports
-    return module.exports.mongodb.connect(uri, { useNewUrlParser: true })
+    return module.exports.mongodb.connect(uri, { useUnifiedTopology: true, useNewUrlParser: true })
         .then(client => { mongoClient = client })
 }
 
